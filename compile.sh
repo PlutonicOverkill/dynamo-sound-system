@@ -23,6 +23,8 @@ echo
 # loop through each library directory
 for lib_dir in src/src/lib/*/; do
 
+    echo
+
     # remove trailing slash
     lib_dir=${lib_dir%/}
 
@@ -66,7 +68,15 @@ for lib_dir in src/src/lib/*/; do
 
         link_libc_options=''
 
+        # recompile all C scripts
         if [ "$c_script_exist" = true ]; then
+            if test -n "$(find bin/build/acs/ -name 'libc.lib' -print -quit)"; then
+                echo libc already exists.
+            else
+                echo Compiling libc...
+                tools/gdcc/gdcc-makelib --bc-target=ZDoom --bc-zdacs-init-delay --alloc-min Sta "" 1000000000 libGDCC libc -o bin/build/acs/libc.lib
+            fi
+
             echo Compiling C scripts...
             link_libc_options='-llibc'
 
@@ -95,8 +105,106 @@ echo
 
 # loop through each map directory
 for map_dir in src/src/maps/*/; do
+    echo
 
     # remove trailing slash
-    lib_dir=${lib_dir%/}
+    map_dir=${map_dir%/}
 
+    # search for .wad files
+    # get newest map in folder
+    # in case of multiple .wads
+    newest_map=$(find ${map_dir} -name '*.wad' -print -quit)
+    if test -n $newest_map; then
+        mkdir -p bin/build/maps
+
+        # get immediate map directory
+        map_path=$newest_map
+        map_directory=${map_dir#src/src/}
+        newest_map=$(basename "$newest_map")
+
+        echo Map files found in $map_dir
+        echo Using map file $newest_map
+
+        acs_script_exist=false
+        c_script_exist=false
+        script_exist=false
+
+        # check for scripts
+        if test -n "$(find ${map_dir} -name '*.acs' -print -quit)"; then
+            acs_script_exist=true
+            script_exist=true
+        fi
+        if test -n "$(find ${map_dir} -name '*.c' -print -quit)"; then
+            c_script_exist=true
+            script_exist=true
+        fi
+
+        if [ "$script_exist" = true ]; then
+            echo Found scripts in $map_dir
+
+            # extract map .wad into ir directory
+            echo Extracting map to bin/ir/$map_directory...
+            mkdir -p bin/ir/$map_directory
+            ./tools/gdcc/gdcc-ar-wad wad:"${map_path}" --output "bin/ir/${map_directory}" --extract
+
+            # check AUTOLOAD.txt for libraries to load
+            link_options=''
+            while read map_autoload; do
+                echo Autoloading library $map_autoload
+                link_options+="-l${map_autoload}"
+            done < $map_dir/AUTOLOAD.txt
+
+            # recompile all ACS scripts
+            if [ "$acs_script_exist" = true ]; then
+                echo Compiling ACS scripts...
+
+                ./tools/gdcc/gdcc-acc --warn-all --bc-target=ZDoom $link_options -c $map_dir/*.acs bin/ir/$map_directory/acs.obj
+            fi
+
+            link_libc_options=''
+
+            # recompile all C scripts
+            if [ "$c_script_exist" = true ]; then
+                if test -n "$(find bin/build/acs/ -name 'libc.lib' -print -quit)"; then
+                    echo libc already exists.
+                else
+                    echo Compiling libc...
+                    tools/gdcc/gdcc-makelib --bc-target=ZDoom --bc-zdacs-init-delay --alloc-min Sta "" 1000000000 libGDCC libc -o bin/build/acs/libc.lib
+                fi
+
+                echo Compiling C scripts...
+                link_libc_options='-llibc'
+
+                ./tools/gdcc/gdcc-cc --warn-all --bc-target=ZDoom $link_libc_options $link_options -c $map_dir/*.c bin/ir/$map_directory/c.obj
+            fi
+
+            # link scripts into BEHAVIOR file
+
+            echo Linking scripts...
+            ./tools/gdcc/gdcc-ld --warn-all --bc-target=ZDoom --bc-zdacs-init-delay $link_libc_options $link_options bin/ir/$map_directory/*.obj bin/ir/$map_directory/behavior.lib
+
+            # pack everything into wad file in \maps
+
+            #   MAP01       empty
+            #   TEXTMAP     extracted TEXTMAP from map .wad
+            #   SCRIPTS     map script source (not 100% necessary)
+            #   BEHAVIOR    compiled map script
+            #   ZNODES      extracted ZNODES from map .wad
+            #   ENDMAP      empty
+
+            echo Packing files into maps/$newest_map...
+            tools/gdcc/gdcc-ar-wad file:MAP01="bin/ir/${map_directory}/MAP01/MAP01" file:TEXTMAP="bin/ir/${map_directory}/MAP01/TEXTMAP" file:BEHAVIOR="bin/ir/${map_directory}/behavior.lib" file:ZNODES="bin/ir/${map_directory}/MAP01/ZNODES" file:ENDMAP="bin/ir/$map_directory/MAP01/ENDMAP" --output "bin/build/maps/${newest_map}"
+        else
+            # no scripts
+            echo No scripts found in %%G.
+
+            echo Moving map file...
+
+            mv $map_path bin/build/maps/$newest_map
+        fi
+
+        echo Map \'$newest_map\' compiled.
+    else
+        echo No maps found in $map_dir
+    fi
 done
