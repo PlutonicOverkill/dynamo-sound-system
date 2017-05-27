@@ -42,8 +42,19 @@ build_name='dynamic_music_system-'$git_version'.pk3'
 # force recompilation of libc
 rm bin/build/libc.lib
 
+echo
+echo Compiling...
+echo
+
 # run the compile script
 . ./compile.sh
+
+echo
+echo Building .pk3 file...
+echo
+
+# make the .pk3 file
+7z a -r -tzip bin/$build_name bin/build
 
 # which should be piped through dev/null, but my
 # version of bash doesn't support it for some reason
