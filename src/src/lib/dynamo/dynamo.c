@@ -2,11 +2,6 @@
 
 #include <ACS_ZDoom.h>
 
-void DSS_init(void)
-{
-    
-}
-
 void DSS_set_song(DSS_Song* song)
 {
     

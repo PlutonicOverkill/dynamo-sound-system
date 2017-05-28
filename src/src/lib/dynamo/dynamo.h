@@ -1,48 +1,52 @@
 #ifndef DYNAMO_SOUND_SYSTEM_DYNAMO_H
 #define DYNAMO_SOUND_SYSTEM_DYNAMO_H
 
+#include <stddef.h>
+#include <stdfix.h>
 #include <stdbool.h>
 
 typedef int DSS_Bar;
 typedef int DSS_Tic;
 
+// Maybe in the future this can
+// have a tid member or something
+// to allow 3d spatial music
 typedef struct {
-    char* file_name;
-} DSS_Sound;
-
-typedef struct {
-    
+    int channel;
 } DSS_Channel;
 
 typedef struct {
-    DSS_Channel channels[];
+    DSS_Channel channel;
+    char* file_name;
+} DSS_Sound;
+
+struct DSS_Track_impl {
+    DSS_Channel* channels;
     size_t channel_count;
     
-    DSS_Track* next_tracks[];
+    struct DSS_Track_impl** next_tracks;
     size_t next_track_count;
     
     DSS_Bar length;
     
     bool is_fill;
-} DSS_Track;
+};
+// resolve circular dependency
+typedef struct DSS_Track_impl DSS_Track;
 
 // Note: Make sure the pointer members
 // in the Song do not point to local
 // variables, or DSS will be accessing
 // dangling memory!
 typedef struct {
-    DSS_Track* tracks[];
+    DSS_Track** tracks;
     size_t track_count;
     
     DSS_Track* start_track;
     
     fixed bpm;
+    DSS_Bar bar_grouping;
 } DSS_Song;
-
-// Sets up the library.
-// Should be called once at the 
-// start of every map.
-void DSS_init(void);
 
 // This sets the currently playing song.
 // It's a good idea to wait a bit before
