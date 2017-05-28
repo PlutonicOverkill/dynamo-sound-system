@@ -3,9 +3,17 @@ echo Clearing intermediary compilation files...
 echo
 
 # clear out the build folder
-mkdir bin
-rm -r -- bin/ir
-rm -r -- bin/build
+if ! [ -d bin ]; then
+    mkdir bin
+fi
+
+if [ -d bin/ir ]; then
+    rm -r -- bin/ir
+fi
+
+if [ -d bin/build ]; then
+    rm -r -- bin/build
+fi
 
 # create directories for the binaries
 mkdir bin/ir # binaries built with gdcc go here
@@ -14,7 +22,9 @@ mkdir bin/build # this is what goes into the final .pk3
 # delete all acs binaries except libc.
 # this is because it takes a long time to compile, so
 # it's not something you want to be doing every time
-find bin/build/acs -type f ! -name 'libc.lib' -delete
+if [ -d bin/build/acs ]; then
+    find bin/build/acs -type f ! -name 'libc.lib' -delete
+fi
 
 echo
 echo Compiling libraries...
@@ -22,6 +32,11 @@ echo
 
 # loop through each library directory
 for lib_dir in src/src/lib/*/; do
+
+    # break if there are no libs
+    if [[ $lib_dir = *\** ]]; then
+        break
+    fi
 
     echo
 
@@ -107,6 +122,11 @@ echo
 
 # loop through each map directory
 for map_dir in src/src/maps/*/; do
+    # break if there are no maps
+    if [[ $map_dir = *\** ]]; then
+        break
+    fi
+
     echo
 
     # remove trailing slash

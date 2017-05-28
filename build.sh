@@ -5,8 +5,15 @@ echo
 echo Getting latest build of GDCC...
 echo
 
-rm -- tools/
+if [ -d tools ]; then
+    rm -r tools/
+fi
+
 mkdir tools
+
+if ! [ -d bin ]; then
+    mkdir bin
+fi
 
 # get dropbox URL to latest version of GDCC
 latest_gdcc=$(curl -L https://www.dropbox.com/sh/e4msp35vxp61ztg/AAA2Ti5pBthuMBfwPSb6Y_MCa/gdcc_master-latest_win64.txt?dl=1)
@@ -35,7 +42,10 @@ build_name='dynamic_music_system-'$git_version'.pk3'
 # force recompilation of libc
 # this is because the new version
 # of gdcc might be different
-rm bin/build/acs/libc.lib
+libc=bin/build/acs/libc.lib
+if [ -f $libc ]; then
+    rm $libc
+fi
 
 echo
 echo Compiling...
