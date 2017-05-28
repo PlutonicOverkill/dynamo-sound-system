@@ -31,11 +31,9 @@ echo Compiling libraries...
 echo
 
 # loop through each library directory
-for lib_dir in src/src/lib/*/; do
-
-    # break if there are no libs
-    if [[ $lib_dir = *\** ]]; then
-        break
+for lib_dir in src/src/lib/*; do
+    if ! [ -d $lib_dir ]; then
+        continue
     fi
 
     echo
@@ -121,10 +119,9 @@ echo Compiling maps...
 echo
 
 # loop through each map directory
-for map_dir in src/src/maps/*/; do
-    # break if there are no maps
-    if [[ $map_dir = *\** ]]; then
-        break
+for map_dir in src/src/maps/*; do
+    if ! [ -d $map_dir ]; then
+        continue
     fi
 
     echo
