@@ -67,7 +67,7 @@ path_to_executable=$(which appveyor)
 if [ -x "$path_to_executable" ] ; then
     mkdir bin/appveyor
     cp bin/$build_name bin/appveyor/dynamic_music_system.pk3
-    $path_to_executable PushArtifact bin/appveyor/dynamic_music_system.pk3
+    "${path_to_executable}" PushArtifact bin/appveyor/dynamic_music_system.pk3
 fi
 
 echo
