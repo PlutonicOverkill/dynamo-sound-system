@@ -54,10 +54,12 @@ for lib_dir in src/src/lib/*/; do
 
         # check AUTOLOAD.txt for libraries to load
         link_options=''
-        while read lib_autoload; do
-            echo Autoloading library $lib_autoload
-            link_options+="-l${lib_autoload}"
-        done < $lib_dir/AUTOLOAD.txt
+        if [ -f $lib_dir/AUTOLOAD.txt ]; then
+            while read lib_autoload; do
+                echo Autoloading library $lib_autoload
+                link_options+="-l${lib_autoload}"
+            done < $lib_dir/AUTOLOAD.txt
+        fi
 
         # recompile all ACS scripts
         if [ "$acs_script_exist" = true ]; then
@@ -149,10 +151,12 @@ for map_dir in src/src/maps/*/; do
 
             # check AUTOLOAD.txt for libraries to load
             link_options=''
-            while read map_autoload; do
-                echo Autoloading library $map_autoload
-                link_options+="-l${map_autoload}"
-            done < $map_dir/AUTOLOAD.txt
+            if [ -f $lib_dir/AUTOLOAD.txt ]; then
+                while read map_autoload; do
+                    echo Autoloading library $map_autoload
+                    link_options+="-l${map_autoload}"
+                done < $map_dir/AUTOLOAD.txt
+            fi
 
             # recompile all ACS scripts
             if [ "$acs_script_exist" = true ]; then
@@ -198,9 +202,9 @@ for map_dir in src/src/maps/*/; do
             # no scripts
             echo No scripts found in %%G.
 
-            echo Moving map file...
+            echo Copying map file...
 
-            mv $map_path bin/build/maps/$newest_map
+            cp $map_path bin/build/maps/$newest_map
         fi
 
         echo Map \'$newest_map\' compiled.
@@ -208,3 +212,19 @@ for map_dir in src/src/maps/*/; do
         echo No maps found in $map_dir
     fi
 done
+
+echo
+
+# now we need to copy all the files
+# and directories that we haven't already
+for src_file in src/*; do
+    if ! [[ $src_file = src/src ]]; then
+        echo Copying $src_file
+
+        destination=bin/build/${src_file#src/}
+        mkdir -p $(dirname "${destination}") && cp -r $src_file $destination
+
+    fi
+done
+
+echo Compilation complete.
