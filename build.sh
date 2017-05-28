@@ -59,16 +59,16 @@ echo Building .pk3 file...
 echo
 
 # make the .pk3 file
-7z a -r -tzip bin/$build_name bin/build
+7z a -r -tzip bin/$build_name ./bin/build/*
 
 # which should be piped through dev/null, but my
 # version of bash doesn't support it for some reason
 path_to_executable=$(which appveyor)
 if [ -x "$path_to_executable" ] ; then
     rm -- bin/appveyor/
-	mkdir bin/appveyor
-	cp bin/$build_name bin/appveyor/dynamic_music_system.pk3
-	./$path_to_executable PushArtifact bin/appveyor/dynamic_music_system.pk3
+    mkdir bin/appveyor
+    cp bin/$build_name bin/appveyor/dynamic_music_system.pk3
+    ./$path_to_executable PushArtifact bin/appveyor/dynamic_music_system.pk3
 fi
 
 echo
