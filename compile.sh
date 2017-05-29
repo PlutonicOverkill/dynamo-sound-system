@@ -25,7 +25,7 @@ mkdir bin/build # this is what goes into the final .pk3
 # this is because it takes a long time to compile, so
 # it's not something you want to be doing every time
 if [ -d bin/build/acs ]; then
-    find bin/build/acs -type f ! -name 'libc.lib' -delete
+    /usr/bin/find bin/build/acs -type f ! -name 'libc.lib' -delete
 fi
 
 echo
@@ -89,7 +89,7 @@ for lib_dir in src/src/lib/*; do
 
         # recompile all C scripts
         if [ "$c_script_exist" = true ]; then
-            if test -n "$(find bin/build/acs/ -name 'libc.lib' -print -quit)"; then
+            if test -n "$(/usr/bin/find bin/build/acs/ -name 'libc.lib' -print -quit)"; then
                 echo libc already exists.
             else
                 echo Compiling libc...
@@ -136,7 +136,7 @@ for map_dir in src/src/maps/*; do
     # search for .wad files
     # get newest map in folder
     # in case of multiple .wads
-    newest_map=$(find ${map_dir} -name '*.wad' -print -quit)
+    newest_map=$(/usr/bin/find ${map_dir} -name '*.wad' -print -quit)
     if test -n $newest_map; then
         mkdir -p bin/build/maps
 
@@ -192,7 +192,7 @@ for map_dir in src/src/maps/*; do
 
             # recompile all C scripts
             if [ "$c_script_exist" = true ]; then
-                if test -n "$(find bin/build/acs/ -name 'libc.lib' -print -quit)"; then
+                if test -n "$(/usr/bin/find bin/build/acs/ -name 'libc.lib' -print -quit)"; then
                     echo libc already exists.
                 else
                     echo Compiling libc...
