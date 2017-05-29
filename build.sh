@@ -1,5 +1,9 @@
 #!/bin/bash
 
+shopt extglob
+shopt failglob
+set -o
+
 echo ======== Dynamic Music System for ZDoom ========
 echo
 echo Build started...
