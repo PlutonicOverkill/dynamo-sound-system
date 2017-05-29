@@ -48,7 +48,7 @@ for lib_dir in src/src/lib/*; do
     script_exist=false
 
     # check for scripts
-    set -o noglob
+    shopt -s extglob
     if test -n "$(find ${lib_dir} -name '*.acs' -print -quit)"; then
         acs_script_exist=true
         script_exist=true
@@ -57,7 +57,7 @@ for lib_dir in src/src/lib/*; do
         c_script_exist=true
         script_exist=true
     fi
-    set +o noglob
+    shopt -u extglob
 
     if [ "$script_exist" = true ]; then
         echo Scripts found in $lib_dir
@@ -136,9 +136,9 @@ for map_dir in src/src/maps/*; do
     # search for .wad files
     # get newest map in folder
     # in case of multiple .wads
-    set -o noglob
+    shopt -s extglob
     newest_map=$(find ${map_dir} -name '*.wad' -print -quit)
-    set +o noglob
+    shopt -u extglob
     if test -n $newest_map; then
         mkdir -p bin/build/maps
 
@@ -155,7 +155,7 @@ for map_dir in src/src/maps/*; do
         script_exist=false
 
         # check for scripts
-        set -o noglob
+        shopt -s extglob
         if test -n "$(find ${map_dir} -name '*.acs' -print -quit)"; then
             acs_script_exist=true
             script_exist=true
@@ -164,7 +164,7 @@ for map_dir in src/src/maps/*; do
             c_script_exist=true
             script_exist=true
         fi
-        set +o noglob
+        shopt -u extglob
 
         if [ "$script_exist" = true ]; then
             echo Found scripts in $map_dir
