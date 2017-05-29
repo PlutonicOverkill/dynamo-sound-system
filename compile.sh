@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo
 echo Clearing intermediary compilation files...
 echo
