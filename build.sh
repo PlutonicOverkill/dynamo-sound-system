@@ -1,8 +1,6 @@
 #!/bin/bash
 
-shopt extglob
-shopt failglob
-set -o
+set -x
 
 echo ======== Dynamic Music System for ZDoom ========
 echo
