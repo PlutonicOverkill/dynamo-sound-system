@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 echo ======== Dynamic Music System for ZDoom ========
 echo
 echo Build started...
