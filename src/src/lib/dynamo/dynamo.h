@@ -5,48 +5,49 @@
 #include <stdfix.h>
 #include <stdbool.h>
 
+typedef int DSS_Tid;
+
 typedef int DSS_Bar;
 typedef int DSS_Tic;
 
-// Maybe in the future this can
-// have a tid member or something
-// to allow 3d spatial music
-typedef struct {
+typedef struct DSS_Channel DSS_Channel;
+typedef struct DSS_Sound DSS_Sound;
+typedef struct DSS_Track DSS_Track;
+typedef struct DSS_Song DSS_Song;
+
+struct DSS_Channel {
+    DSS_Tid tid;
     int channel;
-} DSS_Channel;
+    fixed volume;
+    fixed attenuation;
+};
 
-typedef struct {
-    DSS_Channel channel;
-    char* file_name;
-} DSS_Sound;
+struct DSS_Sound {
+    const DSS_Channel* channel;
+    const char* name;
+};
 
-struct DSS_Track_impl {
-    DSS_Channel* channels;
-    size_t channel_count;
-    
-    struct DSS_Track_impl** next_tracks;
+struct DSS_Track {
+    DSS_Sound* sounds;
+    size_t sound_count;
+
+    const DSS_Track** next_tracks;
     size_t next_track_count;
-    
+
     DSS_Bar length;
-    
+
     bool is_fill;
 };
-// resolve circular dependency
-typedef struct DSS_Track_impl DSS_Track;
 
-// Note: Make sure the pointer members
-// in the Song do not point to local
-// variables, or DSS will be accessing
-// dangling memory!
-typedef struct {
+struct DSS_Song {
     DSS_Track** tracks;
     size_t track_count;
-    
-    DSS_Track* start_track;
-    
+
+    const DSS_Track* start_track;
+
     fixed bpm;
     DSS_Bar bar_grouping;
-} DSS_Song;
+};
 
 // This sets the currently playing song.
 // It's a good idea to wait a bit before
@@ -60,7 +61,7 @@ typedef struct {
 // afterwards somehow, and that it is
 // not deleted before the song has
 // finished playing.
-void DSS_set_song(DSS_Song*);
+void DSS_set_song(const DSS_Song*);
 
 // Starts playing the song from the first
 // track.
@@ -85,7 +86,7 @@ void DSS_resume_song(void);
 // Of course, if you haven't set up the pathways
 // between tracks correctly, this function will
 // have no effect.
-void DSS_change_track(DSS_Track*);
+void DSS_change_track(const DSS_Track*);
 
 // Works the same way as DSS_change_track(),
 // except once the chosen track has been played,
@@ -93,6 +94,27 @@ void DSS_change_track(DSS_Track*);
 // before the function was called, as long as
 // a pathway leads back there. Used for stingers,
 // reveal music, and the like.
-void DSS_change_track_once(DSS_Track*);
+void DSS_change_track_once(const DSS_Track*);
+
+// Creates a new 2d audio channel.
+DSS_Channel* DSS_new_channel_2d();
+
+// Creates a new 3d audio channel at the specified
+// position.
+DSS_Channel* DSS_new_channel_3d_position
+    (fixed x, fixed y, fixed z);
+
+// Creates a new 3d audio channel at the position
+// of the specified Thing. The audio channel will
+// move as the Thing moves so you can attach it
+// to enemies, players, etc.
+DSS_Channel* DSS_new_channel_3d(DSS_Tid);
+
+// Deletes a channel created by one of the
+// new channel functions.
+void DSS_delete_chanel(DSS_Channel*);
+
+// Changes the volume of a channel.
+void DSS_set_channel_volume(DSS_Channel*, fixed);
 
 #endif
