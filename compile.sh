@@ -48,11 +48,13 @@ for lib_dir in src/src/lib/*; do
     script_exist=false
 
     # check for scripts
-    if test -n $(find ${lib_dir} -name '*.acs' -print -quit); then
+    set -- ${lib_dir}/*.acs
+    if [ -f "$1" ]; then
         acs_script_exist=true
         script_exist=true
     fi
-    if test -n $(find ${lib_dir} -name '*.c' -print -quit); then
+    set -- ${lib_dir}/*.c
+    if [ -f "$1" ]; then
         c_script_exist=true
         script_exist=true
     fi
@@ -151,11 +153,13 @@ for map_dir in src/src/maps/*; do
         script_exist=false
 
         # check for scripts
-        if test -n $(find ${map_dir} -name '*.acs' -print -quit); then
+        set -- ${map_dir}/*.acs
+        if [ -f "$1" ]; then
             acs_script_exist=true
             script_exist=true
         fi
-        if test -n $(find ${map_dir} -name '*.c' -print -quit); then
+        set -- ${map_dir}/*.c
+        if [ -f "$1" ]; then
             c_script_exist=true
             script_exist=true
         fi
