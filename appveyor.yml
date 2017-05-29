@@ -1,6 +1,6 @@
 version: 1.0.{build}
 install:
 - set PATH=C:\Program Files\Git\mingw64\bin;%PATH%
-- cmd: sh build.sh
+- cmd: bash build.sh
 build: off
 clone_folder: c:\projects\dynamic_music_system
