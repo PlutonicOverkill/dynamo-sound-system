@@ -1,8 +1,6 @@
 #ifndef DYNAMO_SOUND_SYSTEM_DYNAMO_H
 #define DYNAMO_SOUND_SYSTEM_DYNAMO_H
 
-THIS IS A COMPILATION ERROR
-
 #include <stddef.h>
 #include <stdfix.h>
 #include <stdbool.h>
