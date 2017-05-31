@@ -1,0 +1,6 @@
+map MAP01 "The Crater"
+{
+	sky1 = "NSKY"
+	music = "D_KILLIN"
+	PrecacheSounds = "world/eng1", "world/eng2"
+}

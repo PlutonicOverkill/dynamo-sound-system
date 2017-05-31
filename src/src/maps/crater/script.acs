@@ -1,0 +1,577 @@
+#include "zcommon.acs"
+
+#define MAX_PLAYERS	8
+#define MAZE_MONSTERS_AMOUNT 40
+#define MAZE_ITEM_AMOUNT 41
+#define INTERPOLATIONPOINT_AMOUNT 15
+#define INTERPOLATION_PLAYERSTART 314
+
+#define INTRO_CUTSCENE_DELAY 1
+
+#define REFLECTIONS FALSE
+#define NUKAGE_REFLECTIONS FALSE
+
+int player_tids[MAX_PLAYERS];
+
+int intro_camera_tids[MAX_PLAYERS];
+int intro_interpolation_times[INTERPOLATIONPOINT_AMOUNT] = {0, 24, 12, 16, 4, 4, 6, 6, 6, 6, 6, 8, 8, 8, 0};
+
+int intro_interpolationspecials[5] = {304, 310, 311, 314, 0};
+
+str msg[10] = {
+		"The Crater",
+		"    A long abandoned outpost\nbuilt into a long abandoned moon...",
+		"...And you're stuck on that moon.",
+		"OBJECTIVE\n\nFind the base teleporter station, and escape",
+		"Main Power Activated",
+		"Red Power Activated",
+		"Blue Power Activated",
+		"Power must be activated",
+		"Red Power must be activated",
+		"Blue Power must be activated"
+	};
+
+script "print_msg" (int index, int player)
+{
+		SetActivator(player_tids[player], AAPTR_DEFAULT);
+
+		HudMessage(s:msg[index]; HUDMSG_TYPEON, 1, CR_GOLD, 0.5, -0.5, 2.5, 0.025, 1.0);
+
+		//Log(s:"Showed player #", i:player, s:" informative message #", i:index);
+
+		Delay(150);
+}
+
+bool intro_cutscene_setup = FALSE;
+
+script "setup_intro_cutscene" OPEN
+{
+	for (int player_loop = 0; player_loop < MAX_PLAYERS; ++player_loop)
+	{
+		intro_camera_tids[player_loop] = UniqueTID(1, 0);
+		SpawnSpotFacing("MovingCamera", 300, intro_camera_tids[player_loop]); // Spawn a MovingCamera as a copy of Thing 300
+
+		//Log(s:"Spawned player #", i:player_loop, s:" camera with unique TID of ", i:intro_camera_tids[player_loop]);
+
+		int next_tid = UniqueTID(1, 0);
+		SetThingSpecial(intro_camera_tids[player_loop], 0, next_tid /*next node*/, 0, 2 /*adjust angle*/, 0); // MovingCamera points to first InterpolationPoint in path
+
+		int current_tid = 0;
+		int special_index = 0;
+		int has_special = FALSE;
+
+		for (int i = 1; i < INTERPOLATIONPOINT_AMOUNT; ++i) // loop through all InterpolationPoints
+		{
+			SpawnSpotFacing("InterpolationPoint", 300 + i, next_tid); // spawn InterpolationPoint to copy thing 300 + i and give it a tid
+
+			current_tid = next_tid;
+
+			if (300 + i == INTERPOLATION_PLAYERSTART) // move to player start spot
+			{
+				Thing_Move(current_tid, 500 + player_loop, TRUE);
+				SetActorPosition(current_tid, GetActorX(current_tid), GetActorY(current_tid), GetActorFloorZ(current_tid) + 41.0, FALSE);
+				// move actor to player's view height
+
+				SetActorAngle(current_tid, GetActorAngle(500 + player_loop));
+			}
+
+			if (300 + i == intro_interpolationspecials[special_index]) // if has corresponding special
+			{
+				has_special = TRUE;
+
+				int x = UniqueTID(1, 0); // get temporary unique TID
+
+				SpawnSpotFacing("InterpolationSpecial", 300 + i, x);
+				SetThingSpecial(x, 226, 300 + i, 0, player_loop); // InterpolationSpecial calls ACS_ExecuteAlways on its corresponding script
+			}
+
+			next_tid = UniqueTID(1, 0); // get new TID for next InterpolationPoint
+
+			SetThingSpecial(current_tid, 0, 0, intro_interpolation_times[i-1] /*travel time*/, 0, next_tid /*next node*/, 0); // set InterpolationPoint properties
+
+			if (has_special)
+			{
+				has_special = FALSE;
+
+				Thing_ChangeTID(x, current_tid); // change TID to same as corresponding InterpolationPoint
+
+				++special_index;
+			}
+		}
+		SpawnSpotFacing("InterpolationPoint", 300 + INTERPOLATIONPOINT_AMOUNT, next_tid); // spawn final InterpolationPoint
+		SetThingSpecial(next_tid, 0, 0, intro_interpolation_times[INTERPOLATIONPOINT_AMOUNT - 1] /*travel time*/, 0, 0 /*next node*/, 0);
+
+		Delay(1);
+	}
+
+	//Log(s:"Intro cutscene setup done");
+
+
+	intro_cutscene_setup = TRUE;
+}
+
+script "Crater Intro" ENTER
+{
+	if (player_tids[PlayerNumber()])
+	{
+		//Print(s:"Number of players exceeds maximum limit of ", i:MAX_PLAYERS);
+		Thing_ChangeTID(0, 666);
+		Thing_Destroy(666, TRUE, 0);
+	} else {
+		player_tids[PlayerNumber()] = UniqueTID(1, 0);
+		Thing_ChangeTID(0, player_tids[PlayerNumber()]);	// Give player a unique TID if does not already have one
+
+		//Log(s:"Player #", i:PlayerNumber(), s:" entered the game with a unique TID of ", i:player_tids[PlayerNumber()]);
+
+		TakeInventory("Pistol", 1);
+		TakeInventory("Fist", 1);
+		SetPlayerProperty(FALSE, ON, PROP_TOTALLYFROZEN);
+
+		while(!intro_cutscene_setup) Delay(INTRO_CUTSCENE_DELAY);
+
+		//Log(s:"Calling intro_cutscene for player #", i:PlayerNumber());
+
+		ACS_NamedExecuteAlways("intro_cutscene", 0, PlayerNumber());
+	}
+}
+
+script "respawn" RESPAWN
+{
+	if (player_tids[PlayerNumber()]) {
+		Print(s:"Number of players exceeds maximum limit of ", i:MAX_PLAYERS);
+		Thing_ChangeTID(0, 1);
+		Thing_Destroy(666, TRUE, 0);
+	} else {
+		player_tids[PlayerNumber()] = UniqueTID(1, 0);
+		Thing_ChangeTID(0, player_tids[PlayerNumber()]);	// Give player a unique TID if does not already have one
+
+		//Log(s:"Player #", i:PlayerNumber(), s:" respawned with a TID of ", i:ActivatorTID());
+
+		//Log(s:"Calling intro_cutscene for player #", i:PlayerNumber());
+
+		ACS_NamedExecuteAlways("intro_cutscene", 0, PlayerNumber());
+	}
+}
+
+script "death" DEATH
+{
+	player_tids[PlayerNumber()] = 0;
+}
+
+script "intro_cutscene" (int player)
+{
+	SetActivator(player_tids[player], AAPTR_DEFAULT);
+	TakeInventory("Pistol", 1);
+	TakeInventory("Fist", 1);
+	SetPlayerProperty(FALSE, ON, PROP_TOTALLYFROZEN);
+
+	//Log(s:"Playing awesome cutscene for player #", i:player);
+
+	ACS_NamedExecuteAlways("print_msg", 0, 0, player); // print title
+
+	ChangeCamera(intro_camera_tids[player], FALSE, FALSE); // change to intro camera
+	Thing_Activate(intro_camera_tids[player]); // activate the camera
+
+	//Log(s:"Using player #", i:player, s:" camera #", i:intro_camera_tids[player]);
+}
+
+script "disconnect" (int player) DISCONNECT
+{
+	//Log(s:"Player #", i:player, s:" with a TID of ", i:player_tids[player], s:" ragequit.");
+
+	player_tids[player] = 0;
+}
+
+script 304 (int player)
+{
+	ACS_NamedExecuteAlways("print_msg", 0, 1, player);
+}
+
+script 310 (int player)
+{
+	ACS_NamedExecuteAlways("print_msg", 0, 2, player);
+	ACS_NamedExecuteAlways("intro_close_door", 0);
+}
+
+script 311 (int player)
+{
+	//ACS_NamedExecuteAlways("intro_close_door", 0);
+}
+
+script 314 (int player)
+{
+	ACS_NamedExecuteAlways("Crater Intro End", 0, player);
+}
+
+script "Crater Intro End" (int player)
+{
+	TeleportOther(player_tids[player], 500 + player, FALSE); // teleport player to teleport destination
+	Thing_Deactivate(intro_camera_tids[player]);
+
+	//Log(s:"Ending cutscene for player #", i:player, s:" from camera #", i:intro_camera_tids[player]);
+
+	SetActivator(player_tids[player], AAPTR_DEFAULT);
+	GiveInventory("Pistol", 1);
+	GiveInventory("Fist", 1);
+	SetWeapon("Pistol");
+	SetPlayerProperty(FALSE, OFF, PROP_TOTALLYFROZEN);
+
+	ChangeCamera(0, FALSE, FALSE);
+	Delay(100);
+	ACS_NamedExecuteAlways("print_msg", 0, 3, player);
+}
+
+bool intro_door_closed = FALSE;
+
+script "intro_close_door" (void)
+{
+	if (!intro_door_closed)
+	{
+		//Log(s:"Closing door.");
+
+		intro_door_closed = TRUE;
+		Door_Close(16, 16, 0);
+	}
+}
+
+script "stop_intro" (void)
+{
+		if (intro_cutscene_setup) {
+
+			TeleportOther(player_tids[PlayerNumber()], 500 + PlayerNumber(), TRUE);
+			Thing_Deactivate(intro_camera_tids[PlayerNumber()]);
+			ChangeCamera(0, FALSE, FALSE);
+
+			GiveInventory("Pistol", 1);
+			GiveInventory("Fist", 1);
+			SetWeapon("Pistol");
+			SetPlayerProperty(FALSE, OFF, PROP_TOTALLYFROZEN);
+
+			//Log(s:"Player #", i:PlayerNumber(), s:" with a TID of ", i:player_tids[PlayerNumber()], s:" didn't want to watch the awesome cutscene.");
+
+			if (!intro_door_closed)
+			{
+				//Log(s:"Closing door.");
+
+				intro_door_closed = TRUE;
+				Ceiling_LowerToFloor(16, 128);
+			}
+			Delay(200);
+			ACS_NamedExecuteAlways("print_msg", 0, 3, PlayerNumber());
+		} // else Log(s:"Not this time! ************************************");
+}
+
+script "Cratebob" open{
+	//Crates
+	Floor_Waggle(37, 24, 24, 24, 0);
+	Floor_Waggle(38, 20, 32, 21, 0);
+	Floor_Waggle(39, 23, 22, 37, 0);
+	//Nukage (for a wave effect))
+	Floor_Waggle(40, 16, 1, 7, 0);
+	Floor_Waggle(41, 16, 16, 9, 0);
+}
+
+script "PlaneReflection1" OPEN
+{
+	if (REFLECTIONS) Sector_SetPlaneReflection(2, 16, 0);
+	if (NUKAGE_REFLECTIONS) Sector_SetPlaneReflection(797, 64, 0);
+}
+
+bool cyberdemon = FALSE;
+
+script "Cyberdemon" (void)
+{
+	if(!cyberdemon)
+	{
+		cyberdemon = TRUE;
+		SetPlayerProperty(TRUE, ON, PROP_TOTALLYFROZEN);
+		ChangeCamera(31,0,0);
+		Thing_Activate(31);
+		Delay(50);
+		Floor_LowerToLowest(26,8);
+		Delay(100);
+		NoiseAlert(0,0);
+		Delay(100);
+		ChangeCamera(0,0,0);
+		SetPlayerProperty(TRUE, OFF, PROP_TOTALLYFROZEN);
+	}
+
+}
+
+script "Sparx" OPEN{
+	while (TRUE)
+	{
+		Delay(Random(20, 100));
+		Thing_Activate(42);
+	}
+}
+
+bool bridge_lowered = FALSE;
+
+script "lower_bridge" (void)
+{
+	Floor_LowerToLowest(3, 8);
+	Line_SetBlocking(92, 0, BLOCKF_PLAYERS);
+	bridge_lowered = TRUE;
+}
+
+// cratemaze stuff
+
+// Tags
+//*7 - 1052: Bars behind player in crate maze
+//*8 - 1051: Bars in front of player in crate maze
+//*9 - 1055: Full height crates that remain in place during maze ambush
+//*10- 1054: Full height crates that lower during maze ambush to reveal monsters
+//*12- 1049: Half height crates that remain in place during maze ambush
+//*13- 1050: Bars in front of crate maze exit door that raise during maze ambush
+//*14- 1053: Walls around crate maze room that lower during ambush
+//*16- 1056: manc doors
+
+//*1000-1019: Map spots to spawn monsters inside crates
+//*1020-1029: Map spots to spawn imps around maze
+//*2000-2019: Monsters to move inside crates
+//*2020-2029: Imps to move around maze
+
+script "build_maze" (void)
+{
+	Line_SetBlocking(9001, BLOCKF_PLAYERS, 0);
+
+	Floor_RaiseToLowestCeiling(1052, 128);	// raise bars behind player
+	Floor_RaiseToLowestCeiling(1051, 128);	// raise bars in front of player
+	Delay(70);	// wait two seconds
+
+	Line_SetBlocking(9001, 0, BLOCKF_PLAYERS); // linedef no longer blocks players
+
+	Floor_RaiseToLowestCeiling(1055, 16);	// raise full height crates that remain during ambush
+	Floor_RaiseToLowestCeiling(1057, 16);
+	Floor_RaiseByValueTimes8(1049, 16, 16);	// raise half height crates that remain during ambush
+	Floor_RaiseToLowestCeiling(1054, 16);	// raise full height crates that lower during ambush
+
+	Delay(175); // wait five seconds
+
+	for (int i = 0; i < MAZE_MONSTERS_AMOUNT ; ++i)
+	{
+		Thing_Move(1000 + i, 2000 + i, TRUE);
+		//Log(s:"Spawned a monster with a TID of ", i:1000 + i);	// move all monsters into maze
+	}
+
+	for (int j = 0; j < MAZE_ITEM_AMOUNT; ++j)
+	{
+		Thing_Move(3000 + j, 4000 + j, TRUE);
+		//Log(s:"Spawned an item with a TID of ", i:3000 + j);	// move all monsters into maze
+	}
+
+	Floor_LowerToLowest(1051, 16);	// lower bars in front of player
+}
+
+function int monsters_in_maze(void)
+{
+	int monsters;
+
+	for (int i = 0; i < MAZE_MONSTERS_AMOUNT + 1; ++i)
+	{
+		monsters += ThingCount(T_NONE, 1000+i);
+	}
+
+	monsters += ThingCount(T_NONE, 91);
+
+	return monsters;
+}
+
+script "maze_ambush" (void)
+{
+	Floor_LowerToLowest(48, 32);
+	Ceiling_RaiseToNearest(48, 32);
+
+	Floor_RaiseToLowestCeiling(1050, 32);	// raise bars in front of exit
+	Floor_LowerToLowest(1054, 32);	// lower crates and release monsters!
+	Delay(70);
+	Floor_LowerToLowest(1053, 16);	// lower walls around sides of room
+
+	for(int i = 60; i > 0 && monsters_in_maze() > 4; --i) // wait until 60 seconds have passed or until there are 4 or less monsters alive
+	{
+		Delay(35);
+	}
+
+	Door_Open(1056, 32); // release mancubi
+
+	Delay(175);	// wait 5 seconds
+
+	Floor_LowerToLowest(1057, 32);	// Release archviles
+
+	while(monsters_in_maze() > 0)
+	{
+		Delay(35);
+	}
+
+	Floor_LowerToLowest(1052, 32);	// lower bars at entrance of room
+	Floor_LowerToLowest(1050, 32);	// lower bars at exit of room
+
+}
+
+script "coop_bars_release" (void)
+{
+	Floor_LowerToLowest(1052, 32);
+	Delay(105);
+	Floor_RaiseToLowestCeiling(1052, 128);
+}
+
+bool nukage_wall_exploded = FALSE;
+
+script "nukage_wall_explode" (void)
+{
+	if (!nukage_wall_exploded) {
+		nukage_wall_exploded = TRUE;
+		SpawnProjectile(450, "Rocket", 90, 100, 0, 0, 0);
+		Delay(5);
+		SpawnProjectile(451, "Rocket", 90, 100, 0, 0, 0);
+		Delay(15);
+		Floor_LowerInstant(55, 0, 11);
+		Ceiling_LowerInstant(55, 0, 11);
+	}
+}
+
+script "raise_nukage_bridge" (void)
+{
+	FloorAndCeiling_RaiseByValue(49, 16, 11*8);
+	Ceiling_RaiseByValueTimes8(61, 16, 11);
+	Ceiling_RaiseToNearest(75, 32);
+}
+
+script "nukage_gap_block" (void)
+{
+	Line_SetBlocking(90, 0, BLOCKF_PLAYERS);
+}
+
+bool power_on = FALSE;
+bool red_power_on = FALSE;
+bool blu_power_on = FALSE;
+
+script "activate_power" (void)
+{
+	power_on = TRUE;
+	ACS_NamedExecuteAlways("print_msg", 0, 4, PlayerNumber());
+	SoundSequenceOnActor(72, "Engine");
+	Delay(35);
+	SoundSequenceOnActor(73, "Engine");
+	Light_RaiseByValue(17, 128);
+	Light_RaiseByValue(82, 48);
+	Light_RaiseByValue(83, 24);
+	Light_RaiseByValue(84, 16);
+	//Light_RaiseByValue(12, 16);
+	SetLineTexture(20, SIDE_FRONT, TEXTURE_MIDDLE, "SW2MEGA");
+	Thing_Activate(30);
+}
+
+script "activate_red_power" (void)
+{
+	red_power_on = TRUE;
+	Light_RaiseByValue(81, 48);
+	Light_RaiseByValue(18, 128);
+	Light_RaiseByValue(85, 16);
+	Light_RaiseByValue(11, 16);
+	ACS_NamedExecuteAlways("print_msg", 0, 5, PlayerNumber());
+	SetLineTexture(27, SIDE_FRONT, TEXTURE_MIDDLE, "SW2MEGA");
+	Thing_Activate(56);
+}
+
+script "activate_blu_power" (void)
+{
+	blu_power_on = TRUE;
+	Light_RaiseByValue(19, 128);
+	Light_RaiseByValue(102, 56);
+	ACS_NamedExecuteAlways("print_msg", 0, 6, PlayerNumber());
+	SetLineTexture(28, SIDE_FRONT, TEXTURE_MIDDLE, "SW2MEGA");
+	Thing_Activate(80);
+}
+
+script "power_door" (void)
+{
+	if (power_on) {
+		Generic_Door(0, 16, 0, 34, 0);
+	} else {
+		ActivatorSound("*usefail", 127);
+		ACS_NamedExecuteAlways("print_msg", 0, 7, PlayerNumber());
+	}
+}
+
+script "red_power_door" (void)
+{
+	if (red_power_on) {
+		Generic_Door(0, 16, 0, 34, 1);
+	} else {
+		ActivatorSound("*usefail", 127);
+		ACS_NamedExecuteAlways("print_msg", 0, 8, PlayerNumber());
+	}
+}
+
+script "blu_power_door" (int unlocked)
+{
+	if (blu_power_on) {
+		if (unlocked) {
+			Generic_Door(0, 16, 0, 34, 0);
+			} else {
+				Generic_Door(0, 16, 0, 34, 2);
+			}
+	} else {
+		ActivatorSound("*usefail", 127);
+		ACS_NamedExecuteAlways("print_msg", 0, 9, PlayerNumber());
+	}
+}
+
+bool startroom_wall_destroyed = FALSE;
+
+script "startroom_destroy_wall" (void)
+{
+	if (!startroom_wall_destroyed) {
+		startroom_wall_destroyed = TRUE;
+		Thing_Destroy(63, 0);
+		Delay(15);
+		SetLineTexture(77, SIDE_FRONT, TEXTURE_MIDDLE, "-");
+		Floor_LowerInstant(59, 0, 11);
+		Ceiling_LowerInstant(59, 0, 11);
+	}
+}
+
+bool outdoor_lift_raised = FALSE;
+
+script "outdoor_monster_lift" (void)
+{
+	if (bridge_lowered && !outdoor_lift_raised)
+	{
+		outdoor_lift_raised = TRUE;
+		FloorAndCeiling_RaiseByValue(69, 16, 12*8);
+		Floor_RaiseByValueTimes8(57, 16, 12);
+		Floor_RaiseByValueTimes8(68, 16, 12);
+		Thing_Activate(44);
+		Thing_Hate(44, ActivatorTID(), 0);
+		Floor_LowerToLowest(94, 32);
+	}
+}
+
+script "arena_teleport" (void)
+{
+	Floor_RaiseByValueTimes8(6, 16, 10);
+	Floor_RaiseByValueTimes8(8, 16, 10);
+	Floor_RaiseByValueTimes8(10, 16, 10);
+	Floor_RaiseByValueTimes8(71, 16, 10);
+	FloorAndCeiling_RaiseByValue(70, 16, 10*8);
+	Delay(70);
+	Floor_LowerByValueTimes8(10, 32, 10);
+}
+
+script "moving_crate_gimmick" OPEN
+{
+	while(TRUE) {
+		Scroll_Ceiling(151, 64, 0, 0);
+		Polyobj_OR_MoveToSpot(1, 16, 98);
+		Polyobj_OR_MoveToSpot(2, 16, 148);
+		PolyWait(1);
+		PolyWait(2);
+		Scroll_Ceiling(151, -64, 0, 0);
+		Polyobj_OR_MoveToSpot(1, 16, 149);
+		Polyobj_OR_MoveToSpot(2, 16, 150);
+		PolyWait(1);
+		PolyWait(2);
+	}
+}

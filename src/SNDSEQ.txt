@@ -1,0 +1,6 @@
+//When the player starts the power generator.
+:Engine
+	volume 100
+	playuntildone world/eng1
+	playrepeat world/eng2
+end

@@ -1,3 +1,6 @@
+world/eng1 enginit
+world/eng2 engloop
+
 music/test_map/a1 a1
 music/test_map/a2 a2
 music/test_map/a3 a3
