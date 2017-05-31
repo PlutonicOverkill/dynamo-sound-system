@@ -1,5 +1,5 @@
-# DYNAMO
-Crater, featuring Dynamic Sound System for ZDoom
+# THE CRATER
+A dynamite example map, featuring Dynamic Sound System for ZDoom!
 
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/a02eotv3hkd3tple/branch/crater?svg=true)](https://ci.appveyor.com/project/PlutonicOverkill/dynamo-sound-system/branch/crater)
 
