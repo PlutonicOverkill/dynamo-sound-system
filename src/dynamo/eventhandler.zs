@@ -3,31 +3,16 @@
 class DyanmoEventHandler : EventHandler {
     override void OnRegister()
     {
-
+        Dynamo.Init();
     }
 
     override void OnUnregister()
     {
-
-    }
-
-    override void PlayerEntered(PlayerEvent e)
-    {
-        let p = players[e.PlayerNumber].mo;
-
-        if (p)
-        {
-            // do stuff
-        }
-    }
-
-    override void PlayerDisconnected(PlayerEvent e)
-    {
-
+        Dynamo.DeInit();
     }
 
     override void WorldTick()
     {
-
+        Dynamo.Tick();
     }
 }
