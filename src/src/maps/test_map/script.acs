@@ -1,0 +1,6 @@
+#include "zcommon.acs"
+
+script "music_switch" (int track)
+{
+    ScriptCall("Dynamo", "MusicSwitch", track);  // Leave current level and go to next level
+}
