@@ -4,7 +4,7 @@ class DynamoRoute {
         return 0; // temp
     }
 
-    void Add(DynamoBlock)
+    void Add(DynamoBlock block)
     {
 
     }

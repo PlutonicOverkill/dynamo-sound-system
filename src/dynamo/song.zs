@@ -13,23 +13,23 @@ class DynamoSong {
     {
         if (current == target) {
             // found what we were looking for
-            Route route = New(Route);
+            DynamoRoute route = New(DynamoRoute);
             route.Add(current);
             return route;
         }
 
         if (searchDepth >= blocks.Size()) {
             // stuck in a loop, so go back and retry
-            return New(Route);
+            return New(DynamoRoute);
         }
 
         uint candidates = 0;
-        Route route = New(Route);
+        DynamoRoute route = New(DynamoRoute);
 
         for (int i = 0; i != current.NextBlocks().Size(); ++i)
         {
             DynamoBlock next = current.NextBlocks()[i];
-            Route tempRoute = FindRoute(next, target, searchDepth + 1);
+            DynamoRoute tempRoute = FindRoute(next, target, searchDepth + 1);
             tempRoute.Add(current);
 
             if (tempRoute.Length() < route.Length()) {
