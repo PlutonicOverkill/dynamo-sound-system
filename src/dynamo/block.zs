@@ -1,8 +1,6 @@
 class DynamoBlock {
-    int test;
-
-    static void test2()
+    Array<DynamoBlock> NextBlocks() const
     {
-        Console.printf("test");
+        return New(Array<DynamoBlock>);
     }
 }

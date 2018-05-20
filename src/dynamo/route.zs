@@ -1,6 +1,11 @@
 class DynamoRoute {
-    static void test()
+    uint Length() const
     {
-        Console.printf("test");
+        return 0; // temp
+    }
+
+    void Add(DynamoBlock)
+    {
+
     }
 }

@@ -1,4 +1,4 @@
-version "2.4"
+version "3.2"
 
 #include "dynamo/dynamo.zs"
 #include "dynamo/eventhandler.zs"

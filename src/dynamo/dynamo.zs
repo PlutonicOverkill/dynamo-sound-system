@@ -2,6 +2,7 @@ class Dynamo {
     static void Init()
     {
         Console.printf("Initialising Dynamo...");
+        song = New(Song);
     }
 
     static void DeInit()
@@ -19,6 +20,6 @@ class Dynamo {
 
     }
 
-    DynamoSong song;
-    DynamoRoute route;
+    private DynamoSong song;
+    private DynamoRoute route;
 }
