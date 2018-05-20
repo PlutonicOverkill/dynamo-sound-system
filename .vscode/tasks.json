@@ -6,13 +6,14 @@
         {
             "label": "Compile Dynamo",
             "type": "shell",
-            "command": "./compile.bat"
+            "command": "./compile.bat",
+            "problemMatcher": []
         },
-
         {
             "label": "Run Dynamo",
             "type": "shell",
-            "command": "./run.bat"
+            "command": "./run.bat",
+            "problemMatcher": []
         }
     ]
 }
