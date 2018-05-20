@@ -1,0 +1,229 @@
+#include "zcommon.acs"
+
+#pragma block_scope on
+#pragma fixed on
+
+#define BPM	175
+#define BEATS_PER_BAR	4
+#define SOUND_CHANNELS	1
+#define MUSIC_TRACK_AMOUNT	6
+#define BAR_GROUPING	4
+
+#define MUSIC_DEBUG 1
+
+#define MUSIC_DRIVER_SPEED 1
+
+// music/main = 112
+// music/intro = 4
+// music/mainfill = 2
+// music/spookyfill = 2
+// music/spooky = 8
+
+struct Channel {
+	str name;
+}
+
+struct Track {
+	Channel channels[SOUND_CHANNELS];
+	int length;
+	bool is_fill;
+	bool route[MUSIC_TRACK_AMOUNT];
+}
+
+struct Song {
+	Track tracks[MUSIC_TRACK_AMOUNT];
+	int start_track;
+}
+
+Song dynamic_test;
+
+str music_tracks[MUSIC_TRACK_AMOUNT][SOUND_CHANNELS] = {{""}, {"music/main"}, {"music/spooky"}, {"music/intro"}, {"music/mainfill"}, {"music/spookyfill"}};
+int track_lengths[MUSIC_TRACK_AMOUNT] = {				1,		112,			8,				4,					2,					2};
+														//	 1, 2, 3, 4, 5, 6
+int track_route[MUSIC_TRACK_AMOUNT][MUSIC_TRACK_AMOUNT] = { {0, 4, 4, 0, 0, 0}, //			1
+															{5, 0, 5, 0, 0, 0}, // music/main 2
+															{6, 6, 0, 0, 0, 0}, // music/spooky 3
+															{0, 0, 0, 0, 0, 0}, // music/intro 4
+															{0, 0, 0, 0, 0, 0}, // music/mainfill 5
+															{0, 0, 0, 0, 0, 0} };//music/spookyfill 6
+
+int target_track = 0;
+
+function void stop_track(int);
+function void play_track(int, int, int);
+function int bars_to_tics (int);
+function int tics_to_bars (int);
+function bool is_fill_bar (int, int);
+function void stop_music_driver (void);
+function void change_music (int);
+function void set_channel_volume (int, int);
+function bool track_in_range (int);
+function bool channel_in_range (int);
+function int next_fill (int, int);
+
+script "setup_music_driver" OPEN
+{
+	for(int i = 0; i < MUSIC_TRACK_AMOUNT; ++i)
+	{
+		for(int j = 0; j < SOUND_CHANNELS; ++j)
+		{
+			play_track(i, j, 0.0); // play all sounds beforehand to cache them in memory
+			Delay(1);
+			stop_track(j);
+		}
+	}
+}
+
+function void stop_track(int channel)
+{
+	if (!channel_in_range(channel))
+	{
+		Log(s:"Channel out of range in stop_track");
+		return;
+	}
+
+	if (MUSIC_DEBUG)
+	{
+		Log(s:"Stopping sound on channel ", i:channel);
+	}
+
+	StopSound(1, CHAN_WEAPON + channel);
+}
+
+function void play_track(int track, int channel, int volume)
+{
+	if (!track_in_range(track))
+	{
+		Log(s:"Track out of range in play_track");
+		return;
+	}
+
+	if (!channel_in_range(channel))
+	{
+		Log(s:"Channel out of range in play_track");
+		return;
+	}
+
+	if (MUSIC_DEBUG)
+	{
+		Log(s:"Playing track ", i:track, s:" on channel ", i:channel, s:" at volume ", f:volume);
+	}
+
+	PlaySound(1, music_tracks[track][channel], CHAN_WEAPON + channel, volume, FALSE, ATTN_NONE);
+}
+
+function int bars_to_tics (int bars)
+{
+	int tics = FixedDiv(60 * BEATS_PER_BAR * bars, 0.028) / BPM;
+
+	if (MUSIC_DEBUG)
+	{
+		Log(s:"Converting ", i:bars, s:" bars to ", i:tics, s:" tics");
+	}
+
+	return tics;
+}
+
+function int tics_to_bars (int tics)
+{
+	int bars = tics * BPM * 0.028 / 60 / BEATS_PER_BAR;
+
+	if (MUSIC_DEBUG)
+	{
+		Log(s:"Converting ", i:tics, s:" tics to ", i:bars, s:" bars");
+	}
+
+	return bars;
+}
+
+function bool is_fill_bar (int bar, int fill_length)
+{
+	return !((bar + fill_length) % BAR_GROUPING);
+}
+
+function void stop_music_driver (void)
+{
+
+}
+
+
+
+function void change_music (int track)
+{
+	if (!track_in_range(track))
+	{
+		Log(s:"Track out of range in play_track");
+		return;
+	}
+
+	target_track = track;
+}
+
+function void set_channel_volume (int channel, int volume)
+{
+	if (!channel_in_range(channel))
+	{
+		Log(s:"Channel out of range in set_channel_volume");
+		return;
+	}
+	SoundVolume(1, CHAN_WEAPON + channel, volume);
+}
+
+function bool track_in_range (int track)
+{
+	return (track >= 0 && track < MUSIC_TRACK_AMOUNT);
+}
+
+function bool channel_in_range (int channel)
+{
+	return (channel >= 0 && channel < SOUND_CHANNELS);
+}
+
+function int next_fill (int track, int next_track)
+{
+	if (!track_in_range(track) || !track_in_range(next_track))
+	{
+		Log(s:"Track out of range in next_fill");
+		return -1;
+	}
+
+	if (MUSIC_DEBUG)
+	{
+		Log(s:"next_fill for track ", i:track, s:" is track ", i:next_track);
+	}
+
+	return track_route[track][next_track];
+}
+
+script "music_driver" OPEN
+{
+	// start playing track 0
+	// save start Timer() value at start of track
+	// set current timer value to 0
+	// set start bar counter to 0
+	// set current bar counter to 0
+
+	// infinite loop
+
+	// get new Timer() value and compare to start time
+	// if advanced another bar
+	//		increment bar counter
+	//		if fill should be played and current bar is fill bar
+	//			if current track has not finished playing
+	//				stop current track
+	//			{update current track to fill track
+	//			update next fill track
+	//			play current track} function?
+
+	// if current track has finished playing
+	//		{update current track to fill track
+	//		update next fill track
+	//		play current track} function?
+}
+
+////////////////////////////////////////
+
+script "switch_music" (int track)
+{
+
+}

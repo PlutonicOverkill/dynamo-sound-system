@@ -1,0 +1,19 @@
+These are some notes I made when working on this project about a year ago. Half of it doesn't really make any sense anymore and a lot of it's inaccurate and out of date but hey, a least it's a start.
+
+iterating through items (e.g. music tracks) and choosing a random one:
+{
+	int i = 0;
+
+	// ...
+
+	// get new item here
+	if (!random(0, i++))
+	{
+		// replace old item with new
+	}
+}
+
+int best_route[max_tracks];
+int map[max_channels]; // might want to rename this for C++ compatibility
+int current_track = -1;
+int target_track = -1;
