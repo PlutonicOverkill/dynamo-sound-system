@@ -13,4 +13,12 @@ class Dynamo {
     {
         Console.printf("Switched to track %d", track);
     }
+
+    static void Tick()
+    {
+
+    }
+
+    DynamoSong song;
+    DynamoRoute route;
 }

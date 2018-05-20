@@ -11,6 +11,16 @@ class DyanmoEventHandler : EventHandler {
         Dynamo.DeInit();
     }
 
+    override void PlayerEntered(PlayerEvent e)
+    {
+        let p = players[e.PlayerNumber].mo;
+
+        if (p)
+        {
+            // do stuff
+        }
+    }
+
     override void WorldTick()
     {
         Dynamo.Tick();
