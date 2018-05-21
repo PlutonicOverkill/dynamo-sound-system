@@ -1,8 +1,7 @@
-class Dynamo {
+class Dynamo play {
     static void Init()
     {
         Console.printf("Initialising Dynamo...");
-        song = New(Song);
     }
 
     static void DeInit()
@@ -15,11 +14,8 @@ class Dynamo {
         Console.printf("Switched to track %d", track);
     }
 
-    static void Tick()
+    static void Frame()
     {
 
     }
-
-    private DynamoSong song;
-    private DynamoRoute route;
 }

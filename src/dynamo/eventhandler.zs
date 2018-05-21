@@ -23,6 +23,6 @@ class DyanmoEventHandler : EventHandler {
 
     override void WorldTick()
     {
-        Dynamo.Tick();
+        Dynamo.Frame();
     }
 }

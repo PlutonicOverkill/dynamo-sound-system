@@ -7,41 +7,52 @@ class DynamoSong {
         self.bpm = bpm;
     }
 
+    DynamoRoute FindRoute(DynamoBlock current, DynamoBlock target) const
+    {
+        return FindRouteImpl(current, target, 0);
+    }
+
     // uses a depth-first search to find the fastest route from current to target.
     // If two routes are of equal length, one of the two is randomly chosen.
-    DynamoRoute FindRoute(DynamoBlock current, DynamoBlock target, uint searchDepth) const
+    private DynamoRoute FindRouteImpl(DynamoBlock current, DynamoBlock target, uint searchDepth) const
     {
-        if (current == target) {
-            // found what we were looking for
-            DynamoRoute route = New(DynamoRoute);
-            route.Add(current);
-            return route;
-        }
+        if (current == target) // found what we were looking for
+            return DynamoRoute.Create(current);
 
         if (searchDepth >= blocks.Size()) {
             // stuck in a loop, so go back and retry
-            return New(DynamoRoute);
+            return New("DynamoRoute");
         }
 
         uint candidates = 0;
-        DynamoRoute route = New(DynamoRoute);
+        DynamoRoute route = New("DynamoRoute");
 
-        for (int i = 0; i != current.NextBlocks().Size(); ++i)
+        for (int i = 0; i != current.NextBlockCount(); ++i)
         {
-            DynamoBlock next = current.NextBlocks()[i];
-            DynamoRoute tempRoute = FindRoute(next, target, searchDepth + 1);
+            DynamoBlock next = current.NextBlock(i);
+
+            // check if we missed the fill cutoff
+            if (searchDepth == 0 && next.IsFill() && NextFillBar(next) > current.Length())
+                continue;
+
+            DynamoRoute tempRoute = FindRouteImpl(next, target, searchDepth + 1);
             tempRoute.Add(current);
 
-            if (tempRoute.Length() < route.Length()) {
+            if (tempRoute.Compare(route) < 0) {
                 // found a faster route
                 route = tempRoute;
             }
-            else if (tempRoute.Length() == route.Length() && Random(0, i++) == 0) {
+            else if (tempRoute.Compare(route) == 0 && Random(0, i++) == 0) {
                 // randomly choose one of them
                 route = tempRoute;
             }
         }
 
         return route;
+    }
+
+    private uint NextFillBar(DynamoBlock block) const
+    {
+        return 1; // TEMP
     }
 }
