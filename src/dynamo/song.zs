@@ -1,10 +1,26 @@
 class DynamoSong {
-    private uint bpm;
+    private uint bpm = 120;
+    private uint barGrouping = 4;
     private Array<DynamoBlock> blocks;
 
-    void SetBpm(uint bpm)
+    void SetBpm(uint val)
     {
-        self.bpm = bpm;
+        if (val == 0) {
+            Console.Printf("Error: Set BPM of zero");
+            return;
+        }
+
+        bpm = val;
+    }
+
+    void SetBarGrouping(uint val)
+    {
+        if (val == 0) {
+            Console.Printf("Error: Set bar grouping of zero");
+            return;
+        }
+
+        barGrouping = val;
     }
 
     DynamoRoute FindRoute(DynamoBlock current, DynamoBlock target) const
