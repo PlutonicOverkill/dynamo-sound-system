@@ -1,22 +1,54 @@
 class DynamoBlock {
+    private bool isFill = false;
+    private uint length = 1;
+    private Array<String> channels;
+    private Array<DynamoBlockHandle> nextBlocks;
+
     uint NextBlockCount() const
     {
-        return 0; // TEMP
+        return nextBlocks.Size();
     }
 
     DynamoBlock NextBlock(uint index) const
     {
-        return New("DynamoBlock"); // TEMP
+        return nextBlocks[index];
+    }
+
+    void SetFill(bool fill)
+    {
+        isFill = fill;
+    }
+
+    void AddChannel(String chan)
+    {
+        channels.Push(chan);
+    }
+
+    void SetLength(uint len)
+    {
+        length = len;
+    }
+
+    void AddNextBlock(DynamoBlockHandle next)
+    {
+        nextBlocks.Push(next);
     }
 
     bool IsFill() const
     {
-        return true; // TEMP
+        return isFill;
     }
 
     // returns length, not including fill
     uint Length() const
     {
-        return 0; // TEMP
+
+    }
+
+    static DynamoBlock Create()
+    {
+        let block = New("DynamoBlock";)
+        //
+        return block;
     }
 }

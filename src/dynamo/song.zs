@@ -2,6 +2,7 @@ class DynamoSong {
     private uint bpm = 120;
     private uint barGrouping = 4;
     private Array<DynamoBlock> blocks;
+    private Array<uint> soundEmitters;
 
     void SetBpm(uint val)
     {
@@ -21,6 +22,37 @@ class DynamoSong {
         }
 
         barGrouping = val;
+    }
+
+    DynamoBlockHandle CreateBlock()
+    {
+        uint index = blocks.Push(DynamoBlock.Create());
+        return DynamoBlockHandle.Create(index);
+    }
+
+    void BlockSetFill(DynamoBlockHandle h, bool fill)
+    {
+        blocks[h.GetIndex()].SetFill(fill);
+    }
+
+    void BlockAddChannel(DynamoBlockHandle h, String chan)
+    {
+        blocks[h.GetIndex()].AddChannel(chan);
+    }
+
+    void BlockSetLength(DynamoBlockHandle h, uint len)
+    {
+        blocks[h.GetIndex()].SetLength(len);
+    }
+
+    void BlockAddNextBlock(DynamoBlockHandle h, DynamoBlockHandle next)
+    {
+        blocks[h.GetIndex()].AddNextBlock(next);
+    }
+
+    void Start()
+    {
+
     }
 
     DynamoRoute FindRoute(DynamoBlock current, DynamoBlock target) const
@@ -69,6 +101,22 @@ class DynamoSong {
 
     private uint NextFillBar(DynamoBlock block) const
     {
-        return 1; // TEMP
+
+    }
+}
+
+class DynamoBlockHandle {
+    private uint index;
+
+    uint GetIndex() const
+    {
+        return index;
+    }
+
+    static DynamoBlockHandle Create(uint i)
+    {
+        let handle = New("DynamoBlockHandle");
+        handle.index = i;
+        return handle;
     }
 }

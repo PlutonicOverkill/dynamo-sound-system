@@ -8,11 +8,11 @@ class Dynamo play {
         globals.song.SetBpm(125);
         globals.song.SetBarGrouping(2);
 
-        DynamoBlockHandle musicIntro = globals.song.Create();
-        DynamoBlockHandle musicStart = globals.song.Create();
-        DynamoBlockHandle musicBuildup = globals.song.Create();
-        DynamoBlockHandle musicDrop = globals.song.Create();
-        DynamoBlockHandle musicLoop = globals.song.Create();
+        DynamoBlockHandle musicIntro = globals.song.CreateBlock();
+        DynamoBlockHandle musicStart = globals.song.CreateBlock();
+        DynamoBlockHandle musicBuildup = globals.song.CreateBlock();
+        DynamoBlockHandle musicDrop = globals.song.CreateBlock();
+        DynamoBlockHandle musicLoop = globals.song.CreateBlock();
 
         globals.song.BlockSetFill(musicDrop, true);
 
@@ -41,18 +41,18 @@ class Dynamo play {
         globals.song.BlockAddChannel(musicLoop, "dynamo/loop_r");
         globals.song.BlockSetLength(musicLoop, 16);
 
-        globals.song.BlockSetNextBlock(musicIntro, musicStart);
+        globals.song.BlockAddNextBlock(musicIntro, musicStart);
 
-        globals.song.BlockSetNextBlock(musicStart, musicStart);
-        globals.song.BlockSetNextBlock(musicStart, musicBuildup);
+        globals.song.BlockAddNextBlock(musicStart, musicStart);
+        globals.song.BlockAddNextBlock(musicStart, musicBuildup);
 
-        globals.song.BlockSetNextBlock(musicBuildup, musicBuildup);
-        globals.song.BlockSetNextBlock(musicBuildup, musicDrop);
+        globals.song.BlockAddNextBlock(musicBuildup, musicBuildup);
+        globals.song.BlockAddNextBlock(musicBuildup, musicDrop);
 
-        globals.song.BlockSetNextBlock(musicDrop, musicLoop);
+        globals.song.BlockAddNextBlock(musicDrop, musicLoop);
 
-        globals.song.BlockSetNextBlock(musicLoop, musicLoop);
-        globals.song.BlockSetNextBlock(musicLoop, musicStart);
+        globals.song.BlockAddNextBlock(musicLoop, musicLoop);
+        globals.song.BlockAddNextBlock(musicLoop, musicStart);
 
         globals.song.Start();
     }
