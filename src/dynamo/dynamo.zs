@@ -8,57 +8,51 @@ class Dynamo play {
         globals.song.SetBpm(125);
         globals.song.SetBarGrouping(2);
 
-        DynamoBlock musicIntro = DynamoBlock.Create();
-        DynamoBlock musicStart = DynamoBlock.Create();
-        DynamoBlock musicBuildup = DynamoBlock.Create();
-        DynamoBlock musicDrop = DynamoBlock.Create();
-        DynamoBlock musicLoop = DynamoBlock.Create();
+        DynamoBlockHandle musicIntro = globals.song.Create();
+        DynamoBlockHandle musicStart = globals.song.Create();
+        DynamoBlockHandle musicBuildup = globals.song.Create();
+        DynamoBlockHandle musicDrop = globals.song.Create();
+        DynamoBlockHandle musicLoop = globals.song.Create();
 
-        musicDrop.SetFill(true);
+        globals.song.BlockSetFill(musicDrop, true);
 
-        musicIntro.AddChannel("dynamo/intro_l");
-        musicIntro.AddChannel("dynamo/intro_m");
-        musicIntro.AddChannel("dynamo/intro_r");
-        musicIntro.SetLength(2)
+        globals.song.BlockAddChannel(musicIntro, "dynamo/intro_l");
+        globals.song.BlockAddChannel(musicIntro, "dynamo/intro_m");
+        globals.song.BlockAddChannel(musicIntro, "dynamo/intro_r");
+        globals.song.BlockSetLength(musicIntro, 2);
 
-        musicStart.AddChannel("dynamo/start_l");
-        musicStart.AddChannel("dynamo/start_m");
-        musicStart.AddChannel("dynamo/start_r");
-        musicStart.SetLength(2)
+        globals.song.BlockAddChannel(musicStart, "dynamo/start_l");
+        globals.song.BlockAddChannel(musicStart, "dynamo/start_m");
+        globals.song.BlockAddChannel(musicStart, "dynamo/start_r");
+        globals.song.BlockSetLength(musicStart, 2);
 
-        musicBuildup.AddChannel("dynamo/buildup_l");
-        musicBuildup.AddChannel("dynamo/buildup_m");
-        musicBuildup.AddChannel("dynamo/buildup_r");
-        musicBuildup.SetLength(4);
+        globals.song.BlockAddChannel(musicBuildup, "dynamo/buildup_l");
+        globals.song.BlockAddChannel(musicBuildup, "dynamo/buildup_m");
+        globals.song.BlockAddChannel(musicBuildup, "dynamo/buildup_r");
+        globals.song.BlockSetLength(musicBuildup, 4);
 
-        musicDrop.AddChannel("dynamo/drop_l");
-        musicDrop.AddChannel("dynamo/drop_m");
-        musicDrop.AddChannel("dynamo/drop_r");
-        musicDrop.SetLength(2);
+        globals.song.BlockAddChannel(musicDrop, "dynamo/drop_l");
+        globals.song.BlockAddChannel(musicDrop, "dynamo/drop_m");
+        globals.song.BlockAddChannel(musicDrop, "dynamo/drop_r");
+        globals.song.BlockSetLength(musicDrop, 2);
 
-        musicLoop.AddChannel("dynamo/loop_l");
-        musicLoop.AddChannel("dynamo/loop_m");
-        musicLoop.AddChannel("dynamo/loop_r");
-        musicLoop.SetLength(16);
+        globals.song.BlockAddChannel(musicLoop, "dynamo/loop_l");
+        globals.song.BlockAddChannel(musicLoop, "dynamo/loop_m");
+        globals.song.BlockAddChannel(musicLoop, "dynamo/loop_r");
+        globals.song.BlockSetLength(musicLoop, 16);
 
-        musicIntro.SetNextBlock(musicStart);
+        globals.song.BlockSetNextBlock(musicIntro, musicStart);
 
-        musicStart.SetNextBlock(musicStart);
-        musicStart.SetNextBlock(musicBuildup);
+        globals.song.BlockSetNextBlock(musicStart, musicStart);
+        globals.song.BlockSetNextBlock(musicStart, musicBuildup);
 
-        musicBuildup.SetNextBlock(musicBuildup);
-        musicBuildup.SetNextBlock(musicDrop);
+        globals.song.BlockSetNextBlock(musicBuildup, musicBuildup);
+        globals.song.BlockSetNextBlock(musicBuildup, musicDrop);
 
-        musicDrop.SetNextBlock(musicLoop);
+        globals.song.BlockSetNextBlock(musicDrop, musicLoop);
 
-        musicLoop.SetNextBlock(musicLoop);
-        musicLoop.SetNextBlock(musicStart);
-
-        globals.song.AddBlock(musicIntro);
-        globals.song.AddBlock(musicStart);
-        globals.song.AddBlock(musicBuildup);
-        globals.song.AddBlock(musicDrop);
-        globals.song.AddBlock(musicLoop);
+        globals.song.BlockSetNextBlock(musicLoop, musicLoop);
+        globals.song.BlockSetNextBlock(musicLoop, musicStart);
 
         globals.song.Start();
     }
