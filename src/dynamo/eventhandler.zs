@@ -3,7 +3,7 @@
 class DyanmoEventHandler : EventHandler {
     override void OnRegister()
     {
-        Dynamo.Init();
+        // Dynamo.Init();
     }
 
     override void OnUnregister()
@@ -19,6 +19,8 @@ class DyanmoEventHandler : EventHandler {
         {
             // do stuff
         }
+
+        Dynamo.Init(); // can't be done in OnRegister as map hasn't been loaded yet
     }
 
     override void WorldTick()

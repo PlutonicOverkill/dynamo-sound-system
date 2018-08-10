@@ -1,18 +1,20 @@
 world/eng1 enginit
 world/eng2 engloop
 
-dynamo/intro_l   test_mus/intro_l
-dynamo/intro_m   test_mus/intro_m
-dynamo/intro_r   test_mus/intro_r
-dynamo/start_l   test_mus/start_l
-dynamo/start_m   test_mus/start_m
-dynamo/start_r   test_mus/start_r
-dynamo/buildup_l test_mus/buildup_l
-dynamo/buildup_m test_mus/buildup_m
-dynamo/buildup_r test_mus/buildup_r
-dynamo/drop_l    test_mus/drop_l
-dynamo/drop_m    test_mus/drop_m
-dynamo/drop_r    test_mus/drop_r
-dynamo/loop_l    test_mus/loop_l
-dynamo/loop_m    test_mus/loop_m
-dynamo/loop_r    test_mus/loop_r
+$pitchshiftrange 0
+
+dynamo/intro_l   "sounds/test_mus/intro_l.wav"
+dynamo/intro_m   "sounds/test_mus/intro_m.wav"
+dynamo/intro_r   "sounds/test_mus/intro_r.wav"
+dynamo/start_l   "sounds/test_mus/start_l.wav"
+dynamo/start_m   "sounds/test_mus/start_m.wav"
+dynamo/start_r   "sounds/test_mus/start_r.wav"
+dynamo/buildup_l "sounds/test_mus/buildup_l.wav"
+dynamo/buildup_m "sounds/test_mus/buildup_m.wav"
+dynamo/buildup_r "sounds/test_mus/buildup_r.wav"
+dynamo/drop_l    "sounds/test_mus/drop_l.wav"
+dynamo/drop_m    "sounds/test_mus/drop_m.wav"
+dynamo/drop_r    "sounds/test_mus/drop_r.wav"
+dynamo/loop_l    "sounds/test_mus/loop_l.wav"
+dynamo/loop_m    "sounds/test_mus/loop_m.wav"
+dynamo/loop_r    "sounds/test_mus/loop_r.wav"

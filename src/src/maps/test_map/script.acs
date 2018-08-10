@@ -2,5 +2,16 @@
 
 script "music_switch" (int track)
 {
-    ScriptCall("Dynamo", "MusicSwitch", track);
+    ScriptCall("Dynamo", "MusicSwitch", track, true);
 }
+
+// HACK because I couldn't figure out how to get events to work.
+/*script "world_tick" OPEN
+{
+    ScriptCall("Dynamo", "Init");
+
+    while (true) {
+        Delay(1);
+        ScriptCall("Dynamo", "Frame");
+    }
+}*/

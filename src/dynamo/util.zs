@@ -14,4 +14,9 @@ class DynamoUtil {
         else
             return numToRound + multiple - remainder;
     }
+
+    static uint BeatsToTics(uint beats, uint bpm)
+    {
+        return 35 * 60 * beats / bpm;
+    }
 }

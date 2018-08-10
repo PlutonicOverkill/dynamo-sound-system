@@ -1,8 +1,11 @@
 version "3.2"
 
+#include "dynamo/beatcallback.zs"
 #include "dynamo/block.zs"
 #include "dynamo/dynamo.zs"
+#include "dynamo/emitter.zs"
 #include "dynamo/eventhandler.zs"
+#include "dynamo/flashygimmick.zs"
 #include "dynamo/globals.zs"
 #include "dynamo/route.zs"
 #include "dynamo/song.zs"

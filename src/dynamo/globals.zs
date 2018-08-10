@@ -4,7 +4,7 @@ class DynamoGlobals : Thinker
 
     DynamoGlobals Init()
     {
-        song = New("DynamoSong");
+        song = DynamoSong.Create();
         ChangeStatNum(STAT_STATIC);
         return self;
     }

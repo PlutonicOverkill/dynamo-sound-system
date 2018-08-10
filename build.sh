@@ -7,7 +7,7 @@ echo
 
 # get filename for built .pk3
 git_version=$(git describe --long --tags --dirty --always)
-build_name='dynamic_music_system-'$git_version'.pk3'
+build_name='dynamo-'$git_version'.pk3'
 
 # force recompilation of libc
 # this is because the new version
@@ -36,8 +36,8 @@ echo
 path_to_executable=$(which appveyor)
 if [ -x "$path_to_executable" ] ; then
     mkdir bin/appveyor
-    cp bin/$build_name bin/appveyor/dynamic_music_system.pk3
-    "${path_to_executable}" PushArtifact bin/appveyor/dynamic_music_system.pk3
+    cp bin/$build_name bin/appveyor/dynamo.pk3
+    "${path_to_executable}" PushArtifact bin/appveyor/dynamo.pk3
 fi
 
 echo

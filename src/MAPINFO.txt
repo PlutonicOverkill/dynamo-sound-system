@@ -1,3 +1,8 @@
+GameInfo
+{
+	EventHandlers = "DyanmoEventHandler"
+}
+
 map MAP01 "The Crater"
 {
 	sky1 = "NSKY"
