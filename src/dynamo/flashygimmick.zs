@@ -10,7 +10,7 @@ class DynamoFlashyGimmick : DynamoBeatCallback {
     override void Call()
     {
         brightness = 32; //255;
-        lightColor = Color(Random(), Random(), Random(), 255);
+        lightColor = Color(255, Random(), Random(), Random()); // alpha goes first for some reason? weird
 
         Console.printf("Color %d %d %d", lightColor.r, lightColor.g, lightColor.b);
     }

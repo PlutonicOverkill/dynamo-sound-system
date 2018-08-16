@@ -208,13 +208,15 @@ class DynamoSong play {
     // If two routes are of equal length, one of the two is randomly chosen.
     private DynamoRoute FindRouteImpl(DynamoBlock current, DynamoBlock target, uint searchDepth) const
     {
+        Console.printf("Current: %s", current.GetChannel(0));
+
         if (current == target) { // found what we were looking for
             Console.printf("Target block found.");
             return DynamoRoute.Create(current, barGrouping);
         }
 
-        if (searchDepth >= blocks.Size()) {
-            Console.printf("Dead end");
+        if (searchDepth > blocks.Size()) {
+            Console.printf("Dead end: %d > %d", searchDepth, blocks.Size());
             // stuck in a loop, so go back and retry
             return null;
         }
