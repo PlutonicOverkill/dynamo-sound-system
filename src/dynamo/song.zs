@@ -242,13 +242,13 @@ class DynamoSong play {
                     route = tempRoute; // set as the current path
 
                     if (searchDepth != 0) {
-                        route.Add(current, barGrouping); // add the node we took to get here
+                        route.Add(current, barGrouping, (searchDepth) ? 0 : beats * 4); // add the node we took to get here
                     }
                 }
             }
             else if (tempRoute) { // we have two possible paths
                 if (searchDepth != 0) {
-                    tempRoute.Add(current, barGrouping); // add the direction we took to get here
+                    tempRoute.Add(current, barGrouping, (searchDepth) ? 0 : beats * 4); // add the direction we took to get here
                 }
 
                 uint routeLength = route.Length();

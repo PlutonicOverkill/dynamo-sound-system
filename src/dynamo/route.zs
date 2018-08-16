@@ -32,7 +32,7 @@ class DynamoRoute {
         return len;
     }
 
-    void Add(DynamoBlock block, uint barGrouping)
+    void Add(DynamoBlock block, uint barGrouping, uint playBar = 0)
     {
         uint size = blocks.Size();
         DynamoBlock prev = size ? blocks[size - 1] : null;
@@ -41,13 +41,11 @@ class DynamoRoute {
         blocks.Push(block);
 
         if (block.IsFill()) {
-            if (prevFill) {
-                len += prev.GetLength();
-            }
+            len += block.GetLength();
         }
         else {
             if (prevFill) {
-                len += block.FirstFillBar(prev, barGrouping);
+                len += block.NextFillBar(prev, barGrouping, playBar);
             }
             else {
                 len += block.GetLength();
